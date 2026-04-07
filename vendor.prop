@@ -1,0 +1,18 @@
+# Inherit everything from Orange Pi 5 Pro and override Rock 5B+-specific values below.
+# The base file is at device/opi/opi5_pro/vendor.prop.
+
+# Chipset — Rock 5B+ uses RK3588 (big cores only, not RK3588S)
+ro.soc.manufacturer=Rockchip
+ro.soc.model=RK3588
+
+# Bluetooth
+bluetooth.device.default_name=Rock 5B+
+
+# Audio — verify card index against `tinymix -D <N>` on your board; may differ from OPi
+persist.vendor.audio.device=jack
+persist.vendor.audio.hdmi.device=vc4hdmi0
+persist.audio.pcm.card=2
+persist.vendor.audio.pcm.device=0
+ro.config.media_vol_default=20
+ro.config.media_vol_steps=25
+ro.hardware.audio.primary=opi
