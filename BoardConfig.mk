@@ -37,5 +37,5 @@ TARGET_USERIMAGES_USE_EXT4 := true
 # Sepolicy
 BOARD_SEPOLICY_DIRS += device/radxa/rock5bplus/sepolicy
 
-# Vendor properties
-TARGET_VENDOR_PROP := $(DEVICE_PATH)/vendor.prop
+# Vendor properties — append so opi5_pro/vendor.prop base is preserved
+TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop

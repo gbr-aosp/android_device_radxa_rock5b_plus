@@ -1,0 +1,6 @@
+# Vendor init scripts
+/vendor/etc/init/hw/init\.rock5bplus\.rc          u:object_r:vendor_configs_file:s0
+/vendor/etc/init/hw/init\.rock5bplus\.usb\.rc     u:object_r:vendor_configs_file:s0
+
+# Fstab
+/vendor/etc/fstab\.rock5bplus                      u:object_r:vendor_configs_file:s0
