@@ -8,7 +8,9 @@ DEVICE_PATH := device/radxa/rock5bplus
 KERNEL_PATH := device/radxa/rock5bplus-kernel
 
 ROCK5BPLUS_BOOT_OUT := $(PRODUCT_OUT)/rock5bplusboot
-$(ROCK5BPLUS_BOOT_OUT): $(INSTALLED_RAMDISK_TARGET)
+# INSTALLED_KERNEL_TARGET is populated via PRODUCT_COPY_FILES in device.mk.
+# Depend on it here so the kernel is present before the boot staging dir is built.
+$(ROCK5BPLUS_BOOT_OUT): $(INSTALLED_RAMDISK_TARGET) $(INSTALLED_KERNEL_TARGET)
 	mkdir -p $(ROCK5BPLUS_BOOT_OUT)
 	cp $(KERNEL_PATH)/Image $(ROCK5BPLUS_BOOT_OUT)
 	# Rock 5B+ uses RK3588 (not RK3588S) — place the correct DTB here once obtained.

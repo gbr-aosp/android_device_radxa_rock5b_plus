@@ -111,6 +111,14 @@ EOF
 echo "${PART_TABLE}" | sudo sfdisk "${IMAGE_PATH}"
 sync
 
+# Move the backup GPT header to the actual end of the image file.
+# Without this, flashing to a larger device (e.g. 119 GiB SD card) leaves the
+# backup header at the wrong sector and triggers a GPT warning at every boot.
+# After flashing to the target device you should also run:
+#   sudo sgdisk --move-second-header /dev/mmcblkX
+#sudo sgdisk --move-second-header "${IMAGE_PATH}"
+#sync
+
 echo "Mapping partitions using kpartx..."
 
 KPARTX_OUT=$(sudo kpartx -av "${IMAGE_PATH}")

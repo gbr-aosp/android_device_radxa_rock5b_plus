@@ -297,38 +297,93 @@ the trap's call is a no-op.
 
 ---
 
-## Flashing the image
-
-Write the finished image to your target storage device (NVMe, eMMC, or SD card)
-with a single `dd`:
-
-```bash
-sudo dd if="${ANDROID_PRODUCT_OUT}/Radxa_Rock5BPlus_aosp-<DATE>-rock5bplus_gpt.img" \
-        of=/dev/sdX bs=4M status=progress conv=fsync
-```
-
-Replace `/dev/sdX` with your actual block device. The image includes U-Boot,
-the GPT, and all required partitions — no separate U-Boot flashing step is
-needed.
-
-To select the boot device (NVMe, eMMC, SD card, USB) or enable recovery, edit
-`config.txt` inside `device/radxa/rock5bplus-kernel/` before building, or
-mount the `boot` partition after flashing and edit it there.
-
----
-
 ## Building from scratch
 
 ```bash
 # 1. Set up the AOSP build environment
 source build/envsetup.sh
-lunch aosp_rock5bplus-ap3a-userdebug   # or -eng / -user
+lunch aosp_rock5bplus_car-trunk_staging-eng   # or -userdebug / -user
 
 # 2. Build the required partition images
-make bootimage systemimage vendorimage
+make bootimage systemimage vendorimage  # or make
 
 # 3. Assemble the flashable GPT image
 bash rock5bplus-mkimg.sh
 ```
 
 The output image will be written to `$ANDROID_PRODUCT_OUT/`.
+
+---
+
+## Flashing the image
+
+### 1. Write the image
+
+Write the finished image to your target storage device (NVMe, eMMC, or SD card)
+with a single `dd`:
+
+```bash
+lsblk
+
+# Unmount any partitions the OS auto-mounted from the target device
+sudo umount /dev/mmcblk0p* 2>/dev/null || true
+
+sudo dd if=$OUT/Radxa_Rock5BPlus_aosp-<DATE>-rock5bplus_gpt.img \
+        of=/dev/mmcblk0 bs=4M status=progress conv=fsync
+sync
+sudo eject /dev/mmcblk0
+```
+
+Replace `/dev/sdX` with your actual block device. The image includes U-Boot,
+the GPT, and all required partitions — no separate U-Boot flashing step is
+needed.
+
+### 2. Fix the backup GPT header (required for cards/drives larger than 19 GiB)
+
+The image is 19 GiB. When written to a larger device the GPT backup header is
+left at the wrong sector and the kernel prints a warning at every boot. Move it
+to the correct location with:
+
+```bash
+sudo sgdisk --move-second-header /dev/sdX
+```
+
+Run this on the host immediately after `dd` finishes, before unmounting or
+ejecting the device.
+
+### 3. Edit `config.txt` to select the boot device (optional)
+
+`config.txt` lives in the FAT32 `boot` partition (partition 1). To change the
+boot device, boot into recovery, or update `fdtfile` without rebuilding, mount
+that partition, edit the file, then unmount cleanly:
+
+```bash
+# Create a temporary mount point
+mkdir -p /tmp/rock5bplus-boot
+
+# Mount partition 1 (the FAT32 boot partition)
+sudo mount /dev/sdX1 /tmp/rock5bplus-boot
+
+# Edit boot configuration
+sudo nano /tmp/rock5bplus-boot/config.txt
+# --- example contents ---
+# boot_device=mmc
+# boot_devnum=1        # 1 = SD card, 0 = eMMC
+# boot_partnum=1
+# root_partnum=2
+# fdtfile=rk3588-rock-5b-plus.dtb
+# fdtoverlay=android-sdcard.dtbo
+# recovery=false
+# ------------------------
+
+# Flush writes and unmount
+sudo umount /tmp/rock5bplus-boot
+rmdir /tmp/rock5bplus-boot
+```
+
+Alternatively, set the desired values in
+`device/radxa/rock5bplus-kernel/config.txt` **before** building so they are
+baked into `boot.img` automatically.
+
+
+ssh gbralisson@192.168.0.207

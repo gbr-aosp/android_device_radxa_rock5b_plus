@@ -16,6 +16,8 @@ BOARD_CUSTOM_BOOTIMG_MK := $(DEVICE_PATH)/mkbootimg.mk
 # androidboot.hardware tag used by init and sepolicy
 BOARD_KERNEL_CMDLINE := console=ttyS2,1500000 no_console_suspend root=/dev/ram0 rootwait androidboot.hardware=rock5bplus
 BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+# Disable printk rate limiting so all service crash messages appear in serial log
+BOARD_KERNEL_CMDLINE += printk.devkmsg=on
 
 # VINTF manifests
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := $(DEVICE_PATH)/framework_compatibility_matrix.xml

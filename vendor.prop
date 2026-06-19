@@ -16,3 +16,16 @@ persist.vendor.audio.pcm.device=0
 ro.config.media_vol_default=20
 ro.config.media_vol_steps=25
 ro.hardware.audio.primary=opi
+
+# drm_hwcomposer — headless bringup aids
+# Force 1920x1080@60 mode for the headless null-display (active when no HDMI cable)
+vendor.hwc.drm.force_mode=1920x1080@60
+# Treat HDMI-A-1 and HDMI-A-2 connectors as external (default, explicit for clarity)
+vendor.hwc.drm.internal_display_names=
+
+# SurfaceFlinger RenderEngine — force Vulkan backend (panfrost Vulkan)
+# to avoid Mesa EGL (GL) initialization failure on headless boot.
+# GL path calls LOG_ALWAYS_FATAL("failed to initialize EGL") which aborts SF,
+# cascading into system_server failure → zygote restart loop.
+# Values: skiagl | skiaglthreaded | skiavk | skiavkthreaded (default: auto)
+debug.renderengine.backend=skiavkthreaded

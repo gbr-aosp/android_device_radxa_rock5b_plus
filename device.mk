@@ -6,6 +6,11 @@
 
 ROCK5BPLUS_PATH := device/radxa/rock5bplus
 
+# Kernel - add BEFORE inherit so this entry wins the PRODUCT_COPY_FILES dedup
+# over the opi5_pro entry (inheriting product's direct entries come first).
+PRODUCT_COPY_FILES += \
+    device/radxa/rock5bplus-kernel/Image:kernel
+
 # Inherit everything from opi5_pro
 $(call inherit-product, device/opi/opi5_pro/device.mk)
 
@@ -18,10 +23,6 @@ PRODUCT_SOONG_NAMESPACES += device/radxa/rock5bplus
 
 # Bring-up kernels may not map to framework kernel FCM tables.
 PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
-
-# Kernel - override opi5_pro entry so INSTALLED_KERNEL_TARGET points to our Image
-PRODUCT_COPY_FILES += \
-    device/radxa/rock5bplus-kernel/Image:$(PRODUCT_OUT)/kernel
 
 # Ramdisk - override opi5 entries with rock5bplus-specific files
 PRODUCT_COPY_FILES += \
